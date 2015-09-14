@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Udacity Neighborhood Map Project - By Rath Panyowat</title>
+        <meta name="description" content="A project 5.1 for Udacity front-end web developer nanodegree course">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+    <body>
+        <div>
+        	<h1>Bangkok Rattanakosin Temple Map</h1>
+        	<input type="text" id="searchbar" name="searchbar">
+        	<a href="#">Submit</a>
+        	<ul data-bind="foreach: PlaceData">
+        		<li data-bind="text: $data.name, click: $parent.setPlace">Item</li>
+        	</ul>
+
+        	<div data-bind="with: currentPlace">
+	        	<h2>Info</h2>
+	        	<img src="" alt="" data-bind="attr: {src: imgSrc, alt: imgAttribute}">
+	        	<p data-bind="text: description">Some Description</p>
+        	</div>
+
+        	<div class="map">
+        	</div>
+        </div>
+		<script src="js/knockout-3.3.0.js"></script>
+		<script src="js/app.js"></script>
+    </body>
+</html>
