@@ -10,9 +10,9 @@
     <body>
         <div>
         	<h1>Bangkok Rattanakosin Temple Map</h1>
-        	<input type="text" id="searchbar" name="searchbar">
+        	<input type="text" id="searchbar" name="searchbar" data-bind="value: filter, valueUpdate: 'afterkeydown'">
         	<a href="#">Submit</a>
-        	<ul data-bind="foreach: PlaceData">
+        	<ul data-bind="foreach: filteredItems">
         		<li data-bind="text: $data.name, click: $parent.setPlace">Item</li>
         	</ul>
 
