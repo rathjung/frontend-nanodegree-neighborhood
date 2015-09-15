@@ -144,7 +144,6 @@ var ViewModel = function() {
 	// Set current location to which user clicked
 	this.setPlace = function(clickedPlace) {
 		self.currentPlace(clickedPlace);
-		self.renderMarkers(clickedPlace);
 	};
 
     // Filter location name with value from search field.
@@ -167,35 +166,6 @@ var ViewModel = function() {
 
   	this.markers = [];
 
-	this.clearMarkers = function() {
-		for (var i = 0; i < self.markers.length; i++) {
-			self.markers[i].setMap(null);
-		}
-  		self.markers = [];
-	};
-
-	this.renderMarkers = function(arrayInput) {
-		self.clearMarkers();
-		var placeToShow;
-		if (Array.isArray(arrayInput)) {
-	  		placeToShow = arrayInput;
-		} else if (!Array.isArray(arrayInput) && (typeof arrayInput === 'object')) {
-			var tempArray = [];
-			tempArray.push(arrayInput);
-	  		placeToShow = tempArray;
-		}
-	  	for (var i = 0, len = placeToShow.length; i < len; i ++) {
-			var location = {lat: placeToShow[i].lat, lng: placeToShow[i].lng};
-			var marker = new google.maps.Marker({
-					position: location,
-					map: self.map
-				});
-
-			self.markers.push(marker);
-			self.markers[i].setMap(self.map);
-	  	}
-	};
-
 	self.renderMarkers(self.placeList());
   	self.filteredItems.subscribe(function(){
 		self.renderMarkers(self.filteredItems());
@@ -203,6 +173,27 @@ var ViewModel = function() {
 
 };
 
+ViewModel.prototype.clearMarkers = function() {
+	for (var i = 0; i < this.markers.length; i++) {
+		this.markers[i].setMap(null);
+	}
+		this.markers = [];
+};
+
+ViewModel.prototype.renderMarkers = function(arrayInput) {
+	this.clearMarkers();
+	var placeToShow = arrayInput;
+  	for (var i = 0, len = placeToShow.length; i < len; i ++) {
+		var location = {lat: placeToShow[i].lat, lng: placeToShow[i].lng};
+		var marker = new google.maps.Marker({
+				position: location,
+				map: this.map
+			});
+
+		this.markers.push(marker);
+		this.markers[i].setMap(this.map);
+  	}
+};
 
 ko.applyBindings(new ViewModel());
 
