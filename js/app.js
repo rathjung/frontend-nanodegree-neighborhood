@@ -126,11 +126,14 @@ var ViewModel = function() {
 	// Google Maps things
   	this.map = new google.maps.Map(document.getElementById('map'), {
         	center: {lat: 13.750521, lng: 100.491460},
-            zoom: 15
+            zoom: 15,
+            scrollwheel: false
         });
 
 	this.markers = [];
-	this.infowindow = new google.maps.InfoWindow({});
+	this.infowindow = new google.maps.InfoWindow({
+		maxWidth: 320
+	});
 
 	this.renderMarkers(self.placeList());
   	this.filteredItems.subscribe(function(){
@@ -163,6 +166,7 @@ ViewModel.prototype.renderMarkers = function(arrayInput) {
 		var marker = new google.maps.Marker({
 				position: location,
 				map: this.map,
+				icon: 'img/map-pin-01.png'
 			});
 
 		this.markers.push(marker);
@@ -175,7 +179,7 @@ ViewModel.prototype.renderMarkers = function(arrayInput) {
 ViewModel.prototype.deactivateAllMarkers = function() {
 	var markers = this.markers;
 	for (var i = 0; i < markers.length; i ++) {
-		markers[i].setIcon(null);
+		markers[i].setIcon('img/map-pin-01.png');
 	}
 };
 
@@ -189,16 +193,16 @@ ViewModel.prototype.activateMarker = function(marker, context, infowindow, index
 		infowindow.close();
 		context.deactivateAllMarkers();
 		infowindow.open(context.map, marker);
-		marker.setIcon('img/map-pin.png');
+		marker.setIcon('img/map-pin-02.png');
 	};
 };
 
 ViewModel.prototype.updateContent = function(place){
-	var html =
+	var html = '<div class="info-content">' +
 		'<h3>' + place.name + '</h3>' +
 		'<img src="' + place.imgSrc + '">' +
-		'<h5>' + place.imgAttribute + '</h5>' +
-		'<p>' + place.description + '</p>';
+		'<em>' + place.imgAttribute + '</em>' +
+		'<p>' + place.description + '</p>' + '</div>';
 
 	this.infowindow.setContent(html);
 };
