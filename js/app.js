@@ -166,10 +166,11 @@ var ViewModel = function() {
 
   	this.markers = [];
 
-	self.renderMarkers(self.placeList());
-  	self.filteredItems.subscribe(function(){
+	this.renderMarkers(self.placeList());
+  	this.filteredItems.subscribe(function(){
 		self.renderMarkers(self.filteredItems());
   	});
+
 
 };
 
@@ -183,16 +184,35 @@ ViewModel.prototype.clearMarkers = function() {
 ViewModel.prototype.renderMarkers = function(arrayInput) {
 	this.clearMarkers();
 	var placeToShow = arrayInput;
+	var selfMarkers = this.markers;
   	for (var i = 0, len = placeToShow.length; i < len; i ++) {
 		var location = {lat: placeToShow[i].lat, lng: placeToShow[i].lng};
 		var marker = new google.maps.Marker({
 				position: location,
-				map: this.map
+				map: this.map,
 			});
 
 		this.markers.push(marker);
 		this.markers[i].setMap(this.map);
+		google.maps.event.addListener(marker, 'click', makeHandler(marker, i));
   	}
+
+	function makeHandler(marker, i) {
+		return function() {
+			for (var i = 0; i < selfMarkers.length; i ++) {
+				selfMarkers[i].setIcon(null);
+			}
+			marker.setIcon('img/map-pin.png');
+		};
+	}
+
+    // google.maps.event.addListener(marker, 'click', function () {
+    //     infoWindow.close();
+    //     infoWindow.setContent('content');
+    //     infoWindow.open(self.map, marker);
+    //     marker.setIcon('img/map-pin.png');
+    // });
+
 };
 
 ko.applyBindings(new ViewModel());
