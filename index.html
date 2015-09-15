@@ -10,7 +10,7 @@
     <body>
         <div>
         	<h1>Bangkok Rattanakosin Temple Map</h1>
-        	<input type="text" id="searchbar" name="searchbar" placeholder="Filter" data-bind="value: filter, valueUpdate: 'afterkeydown'">
+        	<input type="text" id="searchbar" name="searchbar" placeholder="Filter" data-bind="value: search, valueUpdate: 'afterkeydown'">
         	<ul data-bind="foreach: filteredItems">
         		<li data-bind="text: $data.name, click: $parent.setPlace">Item</li>
         	</ul>
@@ -21,8 +21,8 @@
 	        	<p data-bind="text: description">Some Description</p>
         	</div>
 
-        	<div id="map" style="width:100%; height: 1000px; background-color:#eeeeee;" data-bind="map: mapOne">
-        	</div>
+        	<!-- <div id="map" style="width:100%; height: 600px; background-color:#eeeeee;" data-bind="map: mapOne"></div> -->
+        	<div id="map" style="width:100%; height: 600px; background-color:#eeeeee;"></div>
         </div>
 	    <script
 	    	src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBronq51iWrZYmz-HXtzIWRAwHxDeP2mN0">
