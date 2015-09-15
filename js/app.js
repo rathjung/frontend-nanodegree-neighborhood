@@ -100,6 +100,7 @@ var ViewModel = function() {
 
 	// Set current location to which user clicked
 	this.setPlace = function(clickedPlace) {
+
 		self.currentPlace(clickedPlace);
 
 		var index = self.filteredItems().indexOf(clickedPlace);
@@ -125,7 +126,7 @@ var ViewModel = function() {
 	// Google Maps things
   	this.map = new google.maps.Map(document.getElementById('map'), {
         	center: {lat: 13.750521, lng: 100.491460},
-            zoom: 14
+            zoom: 15
         });
 
 	this.markers = [];
@@ -136,6 +137,10 @@ var ViewModel = function() {
 		self.renderMarkers(self.filteredItems());
   	});
 
+	google.maps.event.addListener(self.map, 'click', function(event) {
+		self.deactivateAllMarkers();
+	    self.infowindow.close();
+	});
 
 };
 
@@ -163,7 +168,7 @@ ViewModel.prototype.renderMarkers = function(arrayInput) {
 		this.markers.push(marker);
 		this.markers[i].setMap(this.map);
 
-		marker.addListener('click', this.activateMarker(marker, context, infowindow));
+		marker.addListener('click', this.activateMarker(marker, context, infowindow, i));
   	}
 };
 
@@ -174,8 +179,13 @@ ViewModel.prototype.deactivateAllMarkers = function() {
 	}
 };
 
-ViewModel.prototype.activateMarker = function(marker, context, infowindow) {
+ViewModel.prototype.activateMarker = function(marker, context, infowindow, index) {
 	return function() {
+		if (!isNaN(index)) {
+			var place = context.filteredItems()[index];
+			context.updateContent(place);
+		}
+
 		infowindow.close();
 		context.deactivateAllMarkers();
 		infowindow.open(context.map, marker);
