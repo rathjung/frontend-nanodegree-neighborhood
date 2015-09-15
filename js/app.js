@@ -82,49 +82,6 @@ var Place = function(data) {
 	this.description = data.description;
 };
 
-
-//Google Maps
-/*
-ko.bindingHandlers.map = {
-    init: function (element, valueAccessor, allBindingsAccessor, viewModel) {
-        var mapObj = ko.utils.unwrapObservable(valueAccessor());
-
-        var mapOptions = {
-        	center: {lat: 13.750521, lng: 100.491460},
-            zoom: 14
-        };
-		var markers = [];
-		var infowindow = new google.maps.InfoWindow();
-
-        mapObj.googleMap = new google.maps.Map(element, mapOptions);
-
-		for (var i = 0; i < mapObj.length; ++i) {
-
-			var marker = new google.maps.Marker({
-				position: {
-					lat: ko.utils.unwrapObservable(mapObj[i].lat),
-					lng: ko.utils.unwrapObservable(mapObj[i].lng)
-				},
-				map: mapObj.googleMap
-			});
-
-			markers.push(marker);
-			google.maps.event.addListener(marker, 'click', makeHandler(marker, i));
-		}
-
-		function makeHandler(marker, i) {
-			return function() {
-				var content = '<h4>' + ko.utils.unwrapObservable(mapObj[i].name) + '</h4>' + '<img src="' + ko.utils.unwrapObservable(mapObj[i].imgSrc) + '" alt="' + ko.utils.unwrapObservable(mapObj[i].imgAttribute) +  '"><p>' + ko.utils.unwrapObservable(mapObj[i].description) + '</p>';
-				infowindow.setContent(content);
-				infowindow.open(mapObj.googleMap, marker);
-			};
-		}
-
-        $("#map").data("mapObj", mapObj);
-    }
-};
-*/
-
 var ViewModel = function() {
 	var self = this;
 
@@ -144,6 +101,13 @@ var ViewModel = function() {
 	// Set current location to which user clicked
 	this.setPlace = function(clickedPlace) {
 		self.currentPlace(clickedPlace);
+
+		var index = self.filteredItems().indexOf(clickedPlace);
+
+		self.updateContent(clickedPlace);
+
+		self.activateMarker(self.markers[index], self, self.infowindow)();
+
 	};
 
     // Filter location name with value from search field.
@@ -164,7 +128,8 @@ var ViewModel = function() {
             zoom: 14
         });
 
-  	this.markers = [];
+	this.markers = [];
+	this.infowindow = new google.maps.InfoWindow({});
 
 	this.renderMarkers(self.placeList());
   	this.filteredItems.subscribe(function(){
@@ -183,6 +148,9 @@ ViewModel.prototype.clearMarkers = function() {
 
 ViewModel.prototype.renderMarkers = function(arrayInput) {
 	this.clearMarkers();
+	var infowindow = this.infowindow;
+	var context = this;
+
 	var placeToShow = arrayInput;
 	var selfMarkers = this.markers;
   	for (var i = 0, len = placeToShow.length; i < len; i ++) {
@@ -194,26 +162,38 @@ ViewModel.prototype.renderMarkers = function(arrayInput) {
 
 		this.markers.push(marker);
 		this.markers[i].setMap(this.map);
-		google.maps.event.addListener(marker, 'click', makeHandler(marker, i));
+
+		marker.addListener('click', this.activateMarker(marker, context, infowindow));
   	}
-
-	function makeHandler(marker, i) {
-		return function() {
-			for (var i = 0; i < selfMarkers.length; i ++) {
-				selfMarkers[i].setIcon(null);
-			}
-			marker.setIcon('img/map-pin.png');
-		};
-	}
-
-    // google.maps.event.addListener(marker, 'click', function () {
-    //     infoWindow.close();
-    //     infoWindow.setContent('content');
-    //     infoWindow.open(self.map, marker);
-    //     marker.setIcon('img/map-pin.png');
-    // });
-
 };
+
+ViewModel.prototype.deactivateAllMarkers = function() {
+	var markers = this.markers;
+	for (var i = 0; i < markers.length; i ++) {
+		markers[i].setIcon(null);
+	}
+};
+
+ViewModel.prototype.activateMarker = function(marker, context, infowindow) {
+	return function() {
+		infowindow.close();
+		context.deactivateAllMarkers();
+		infowindow.open(context.map, marker);
+		marker.setIcon('img/map-pin.png');
+	};
+};
+
+ViewModel.prototype.updateContent = function(place){
+	var html =
+		'<h3>' + place.name + '</h3>' +
+		'<img src="' + place.imgSrc + '">' +
+		'<h5>' + place.imgAttribute + '</h5>' +
+		'<p>' + place.description + '</p>';
+
+	this.infowindow.setContent(html);
+};
+
+
 
 ko.applyBindings(new ViewModel());
 
