@@ -1,3 +1,6 @@
+(function(){
+
+// Initialize Model
 var placeData = [
 	{
 		name: 'Wat Phra Kaew',
@@ -73,6 +76,7 @@ var placeData = [
 	}
 ];
 
+// Constructor for Place
 var Place = function(data) {
 	this.name = data.name;
 	this.lat = data.lat;
@@ -82,6 +86,7 @@ var Place = function(data) {
 	this.description = data.description;
 };
 
+// Initialize ViewModel
 var ViewModel = function() {
 	var self = this;
 
@@ -98,16 +103,23 @@ var ViewModel = function() {
 	// Initial current location to be the first one.
 	this.currentPlace = ko.observable(this.placeList()[0]);
 
-	// Set current location to which user clicked
+	// Functions invoked when user clicked an item in the list.
 	this.setPlace = function(clickedPlace) {
 
+		// Set current location to which user clicked.
 		self.currentPlace(clickedPlace);
 
+		// Find index of the clicked location and store for use in activation of marker.
 		var index = self.filteredItems().indexOf(clickedPlace);
 
+		// Prepare content for Google Maps infowindow
 		self.updateContent(clickedPlace);
 
+		// Activate the selected marker to change icon.
+		// function(marker, context, infowindow, index)
 		self.activateMarker(self.markers[index], self, self.infowindow)();
+
+		// Invoke function for instagram API call.
 		self.instagramImg(clickedPlace.lat, clickedPlace.lng);
 
 	};
@@ -119,36 +131,48 @@ var ViewModel = function() {
 	        return self.placeList();
 	    } else {
 	        return ko.utils.arrayFilter(self.placeList(), function(item) {
+	        	// return true if found the typed keyword, false if not found.
             	return item.name.toLowerCase().indexOf(searchTerm) !== -1;
 	        });
 	    }
 	});
 
-	// Google Maps things
+	// Initialize Google Maps
   	this.map = new google.maps.Map(document.getElementById('map'), {
         	center: {lat: 13.750521, lng: 100.491460},
             zoom: 15,
             scrollwheel: false
         });
 
+  	// Initialize markers
 	this.markers = [];
+
+	// Initialize infowindow
 	this.infowindow = new google.maps.InfoWindow({
 		maxWidth: 320
 	});
 
+	// Render all markers with data from the data model.
 	this.renderMarkers(self.placeList());
+
+	// Subscribe to changed in search field. If have change, render again with the filered locations.
   	this.filteredItems.subscribe(function(){
 		self.renderMarkers(self.filteredItems());
   	});
 
+  	// Add event listener for map click event (when user click on other areas of the map beside of markers)
 	google.maps.event.addListener(self.map, 'click', function(event) {
+
+		// Every click change all markers icon back to defaults.
 		self.deactivateAllMarkers();
+
+		// Every click close all indowindows.
 	    self.infowindow.close();
 	});
-
-
 };
 
+
+// Method for clear all markers.
 ViewModel.prototype.clearMarkers = function() {
 	for (var i = 0; i < this.markers.length; i++) {
 		this.markers[i].setMap(null);
@@ -156,13 +180,16 @@ ViewModel.prototype.clearMarkers = function() {
 		this.markers = [];
 };
 
+// Method for render all markers.
 ViewModel.prototype.renderMarkers = function(arrayInput) {
+
+	// Clear old markers before render
 	this.clearMarkers();
 	var infowindow = this.infowindow;
 	var context = this;
-
 	var placeToShow = arrayInput;
-	var selfMarkers = this.markers;
+
+	// Create new marker for each place in array and push to markers array
   	for (var i = 0, len = placeToShow.length; i < len; i ++) {
 		var location = {lat: placeToShow[i].lat, lng: placeToShow[i].lng};
 		var marker = new google.maps.Marker({
@@ -172,12 +199,16 @@ ViewModel.prototype.renderMarkers = function(arrayInput) {
 			});
 
 		this.markers.push(marker);
+
+		//render in the map
 		this.markers[i].setMap(this.map);
 
+		// add event listener for click event to the newly created marker
 		marker.addListener('click', this.activateMarker(marker, context, infowindow, i));
   	}
 };
 
+// Set all marker icons back to default icons.
 ViewModel.prototype.deactivateAllMarkers = function() {
 	var markers = this.markers;
 	for (var i = 0; i < markers.length; i ++) {
@@ -185,20 +216,30 @@ ViewModel.prototype.deactivateAllMarkers = function() {
 	}
 };
 
+// Set the target marker to change icon and open infowindow
+// Call from user click on the menu list or click on the marker
 ViewModel.prototype.activateMarker = function(marker, context, infowindow, index) {
 	return function() {
+
+		// check if have an index. If have an index mean request come from click on the marker event
 		if (!isNaN(index)) {
 			var place = context.filteredItems()[index];
 			context.updateContent(place);
 			context.instagramImg(place.lat, place.lng);
 		}
+		// closed opened infowindow
 		infowindow.close();
+
+		// deactivate all markers
 		context.deactivateAllMarkers();
+
+		// Open targeted infowindow and change its icon.
 		infowindow.open(context.map, marker);
 		marker.setIcon('img/map-pin-02.png');
 	};
 };
 
+// Change the content of infowindow
 ViewModel.prototype.updateContent = function(place){
 	var html = '<div class="info-content">' +
 		'<h3>' + place.name + '</h3>' +
@@ -209,32 +250,43 @@ ViewModel.prototype.updateContent = function(place){
 	this.infowindow.setContent(html);
 };
 
+// Method for instagram API call
 ViewModel.prototype.instagramImg = function(lat, lng) {
-	var igLat = lat;
-	var igLng = lng;
-	var locationURLList = [];
-	var imageObjList = [];
-	var imageList = [];
-	var infoBox = $('#ig-info');
-	var imgDiv = $('.ig-div');
 
+	// Prepare variable
+	var igLat = lat,
+		igLng = lng,
+		locationURLList = [],
+		imageObjList = [],
+		imageList = [],
+		infoBox = $('#ig-info'),
+		imgDiv = $('.ig-div');
+
+	// Remove old image and tell the user we're loading images.
 	imgDiv.remove();
  	infoBox.show().removeClass('bg-danger').addClass('bg-info').text("Loading...");
 
+ 	// Make AJAX call
+ 	// The first call will get an array of location ID. We have to use those ID to make url for call again to get real image objects.
 	$.ajax({
 	    type: 'GET',
 	    dataType: 'jsonp',
 	    cache: true,
 	    url: 'https://api.instagram.com/v1/locations/search?lat=' + igLat.toString() + '&lng=' + igLng.toString() + '&distance=100&access_token=35376971.52c688d.7841812059474470834c3b5dbbd5bfa8'
 	}).done(function(data){
-	    for (var i = 0; i < data.data.length; i++) {
 
+		// If request done, continue the next process
+		// loop through data from instagram and make URL for second call.
+	    for (var i = 0; i < data.data.length; i++) {
+	    	// Create target URL from location ID and push to the URL list array
 	        var targetURL = 'https://api.instagram.com/v1/locations/' + data.data[i].id + '/media/recent?access_token=35376971.52c688d.7841812059474470834c3b5dbbd5bfa8';
 	        locationURLList.push(targetURL);
 	    }
+
+	    // Just 10 location URL is enough. When make a request to each URL, will get a lot of images.
 	    locationURLList = locationURLList.slice(0, 10);
 
-
+		// Make an AJAX call with each URL in array.
 		$.when.apply($, locationURLList.map(function(url) {
 		    return $.ajax({
 	            type: "GET",
@@ -244,27 +296,35 @@ ViewModel.prototype.instagramImg = function(lat, lng) {
 	        });
 		})).done(function() {
 
+			// If got all data from each URL then hide the info box.
 			infoBox.hide();
-		    // there will be one argument passed to this callback for each ajax call
-		    // each argument is of this form [data, statusText, jqXHR]
-		    for (var i = 0; i < arguments.length; i++) {
+
+			// Loop through returned data and make an array of image objects.
+		    for (var i = 0; i < arguments.length; i ++) {
 		        imageObjList.push.apply(imageObjList, arguments[i][0].data);
 		    }
+
+		    // We want only first 10 images to display.
 		    imageObjList = imageObjList.slice(0, 10);
 
+		    // Append images to the page
 		    for (var j = 0; j < imageObjList.length; j ++) {
 		    	$('#ig').append('<div class="ig-div"><a href="' + imageObjList[j].link + '"><img src="' + imageObjList[j].images.low_resolution.url + '" /></a></div>');
 		    }
 
 		});
+
+		// Do not display error message
 		clearTimeout(instagramRequestTimeout);
 	});
 
+	// But if there're any problem in the AJAX call process, tell the user.
 	var instagramRequestTimeout = setTimeout(function(){
 	    infoBox.removeClass('bg-info').addClass('bg-danger').text("Fail to get instagram resources");
 	}, 8000);
 };
 
+// Initialize Knockout View Model
 ko.applyBindings(new ViewModel());
 
-
+})();
