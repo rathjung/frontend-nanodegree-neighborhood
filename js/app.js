@@ -307,11 +307,14 @@ ViewModel.prototype.instagramImg = function(lat, lng) {
 		    // We want only first 10 images to display.
 		    imageObjList = imageObjList.slice(0, 10);
 
+		    var imageContainer = $('<div>');
+
 		    // Append images to the page
 		    for (var j = 0; j < imageObjList.length; j ++) {
-		    	$('#ig').append('<div class="ig-div"><a href="' + imageObjList[j].link + '"><img src="' + imageObjList[j].images.low_resolution.url + '" /></a></div>');
+		    	imageContainer.append('<div class="ig-div"><a href="' + imageObjList[j].link + '"><img src="' + imageObjList[j].images.low_resolution.url + '" /></a></div>');
 		    }
 
+		    $('#image-area').html(imageContainer);
 		});
 
 		// Do not display error message
