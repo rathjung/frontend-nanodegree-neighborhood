@@ -145,6 +145,8 @@ var ViewModel = function() {
 	    self.infowindow.close();
 	});
 
+	this.instagramImg();
+
 };
 
 ViewModel.prototype.clearMarkers = function() {
@@ -207,9 +209,59 @@ ViewModel.prototype.updateContent = function(place){
 	this.infowindow.setContent(html);
 };
 
+ViewModel.prototype.instagramImg = function(lat, lng) {
+	var igLat = 13.753385;
+	var igLng = 100.504221;
+	var locationURLList = [];
+	var imageObjList = [];
+	var imageList = [];
+	var infoBox = $('#ig-info');
 
+ 	infoBox.removeClass('bg-danger').addClass('bg-info').text("Loading...");
+	$.ajax({
+	    type: 'GET',
+	    dataType: 'jsonp',
+	    cache: false,
+	    url: 'https://api.instagram.com/v1/locations/search?lat=' + igLat.toString() + '&lng=' + igLng.toString() + '&distance=100&access_token=35376971.52c688d.7841812059474470834c3b5dbbd5bfa8'
+	}).done(function(data){
+	    for (var i = 0; i < data.data.length; i++) {
+
+	        var targetURL = 'https://api.instagram.com/v1/locations/' + data.data[i].id + '/media/recent?access_token=35376971.52c688d.7841812059474470834c3b5dbbd5bfa8';
+	        locationURLList.push(targetURL);
+	    }
+	    locationURLList = locationURLList.slice(0, 10);
+
+
+		$.when.apply($, locationURLList.map(function(url) {
+		    return $.ajax({
+	            type: "GET",
+	            dataType: "jsonp",
+	            cache: false,
+	            url: url
+	        });
+		})).done(function() {
+
+			$('#ig-info').hide();
+		    // there will be one argument passed to this callback for each ajax call
+		    // each argument is of this form [data, statusText, jqXHR]
+		    for (var i = 0; i < arguments.length; i++) {
+		        imageObjList.push.apply(imageObjList, arguments[i][0].data);
+		    }
+		    imageObjList = imageObjList.slice(0, 10);
+
+		    for (var j = 0; j < imageObjList.length; j ++) {
+		    	$('#ig').append('<div class="ig-div"><a href="' + imageObjList[j].link + '"><img src="' + imageObjList[j].images.low_resolution.url + '" /></a></div>');
+		    }
+
+		});
+		clearTimeout(instagramRequestTimeout);
+	});
+
+	var instagramRequestTimeout = setTimeout(function(){
+	    infoBox.removeClass('bg-info').addClass('bg-danger').text("Fail to get instagram resources");
+	}, 8000);
+};
 
 ko.applyBindings(new ViewModel());
-
 
 

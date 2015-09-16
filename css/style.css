@@ -6,7 +6,7 @@ body {
 
 #map {
     width: 100%;
-    height: 100vh;
+    height: 75vh;
     top:0;
     bottom: 0;
 }
@@ -15,8 +15,9 @@ body {
 }
 
 .site-header {
-	border-bottom: 5px solid #3498db;
 	margin-bottom: 2em;
+	border-bottom: 5px solid #3498db;
+    padding: 24px 24px 24px 12px;
 	background: #0f4696;
 }
 
@@ -38,14 +39,39 @@ body {
 	cursor: pointer;
 }
 
-.section-content {
-	padding: 0;
-}
-
 .info-content {
 	color: black;
 }
 
 .info-content p {
 	margin-top: 1.5em;
+}
+
+#ig {
+	border-top: 10px solid #98b3db;
+	padding: 1em;
+	background: #efefef;
+	min-height:200px;
+	color: black;
+}
+
+.ig-div {
+	display: inline-block;
+	width:20%;
+}
+
+.ig-div img{
+	width:100%;
+}
+
+@media only screen and (min-width: 992px) {
+	.section-content {
+		padding: 0;
+	}
+
+	.ig-div {
+		display: inline-block;
+		width:10%;
+	}
+
 }
