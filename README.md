@@ -4,7 +4,7 @@ This project is for Udacity Front-end Developer course. Its main purpose is for 
 
 ## Demo
 
-[This Link]{http://rath.asia/demo/myjs/neighbor/}
+[This Link](http://rath.asia/demo/myjs/neighbor/)
 
 ## How to install
 
@@ -24,8 +24,8 @@ This app use Google Maps API key and Instagram API access token. I provided mine
 
 ## Library Use
 
-- [Twitter Bootstrap]{http://getbootstrap.com/}
-- [Knockout JS]{http://knockoutjs.com/}
+- [Twitter Bootstrap](http://getbootstrap.com/)
+- [Knockout JS](http://knockoutjs.com/)
 
 ## Change Log
 
