@@ -108,6 +108,7 @@ var ViewModel = function() {
 		self.updateContent(clickedPlace);
 
 		self.activateMarker(self.markers[index], self, self.infowindow)();
+		self.instagramImg(clickedPlace.lat, clickedPlace.lng);
 
 	};
 
@@ -145,7 +146,6 @@ var ViewModel = function() {
 	    self.infowindow.close();
 	});
 
-	this.instagramImg();
 
 };
 
@@ -190,8 +190,8 @@ ViewModel.prototype.activateMarker = function(marker, context, infowindow, index
 		if (!isNaN(index)) {
 			var place = context.filteredItems()[index];
 			context.updateContent(place);
+			context.instagramImg(place.lat, place.lng);
 		}
-
 		infowindow.close();
 		context.deactivateAllMarkers();
 		infowindow.open(context.map, marker);
@@ -210,18 +210,21 @@ ViewModel.prototype.updateContent = function(place){
 };
 
 ViewModel.prototype.instagramImg = function(lat, lng) {
-	var igLat = 13.753385;
-	var igLng = 100.504221;
+	var igLat = lat;
+	var igLng = lng;
 	var locationURLList = [];
 	var imageObjList = [];
 	var imageList = [];
 	var infoBox = $('#ig-info');
+	var imgDiv = $('.ig-div');
 
- 	infoBox.removeClass('bg-danger').addClass('bg-info').text("Loading...");
+	imgDiv.remove();
+ 	infoBox.show().removeClass('bg-danger').addClass('bg-info').text("Loading...");
+
 	$.ajax({
 	    type: 'GET',
 	    dataType: 'jsonp',
-	    cache: false,
+	    cache: true,
 	    url: 'https://api.instagram.com/v1/locations/search?lat=' + igLat.toString() + '&lng=' + igLng.toString() + '&distance=100&access_token=35376971.52c688d.7841812059474470834c3b5dbbd5bfa8'
 	}).done(function(data){
 	    for (var i = 0; i < data.data.length; i++) {
@@ -236,12 +239,12 @@ ViewModel.prototype.instagramImg = function(lat, lng) {
 		    return $.ajax({
 	            type: "GET",
 	            dataType: "jsonp",
-	            cache: false,
+	            cache: true,
 	            url: url
 	        });
 		})).done(function() {
 
-			$('#ig-info').hide();
+			infoBox.hide();
 		    // there will be one argument passed to this callback for each ajax call
 		    // each argument is of this form [data, statusText, jqXHR]
 		    for (var i = 0; i < arguments.length; i++) {
