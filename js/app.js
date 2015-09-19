@@ -139,9 +139,10 @@ var ViewModel = function() {
 
 	// Initialize Google Maps
   	this.map = new google.maps.Map(document.getElementById('map'), {
-        	center: {lat: 13.750521, lng: 100.491460},
+        	center: {lat: 13.749143, lng: 100.497345},
             zoom: 15,
-            scrollwheel: false
+			mapTypeControl: false,
+			streetViewControl: false
         });
 
   	// Initialize markers
